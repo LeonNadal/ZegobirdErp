@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal" android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+    >
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="#000" />
+    <TextView
+        android:id="@+id/tv_good_number"
+        android:text="商品编号"
+        android:padding="3dp"
+        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"/>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="#000" />
+    <TextView
+        android:id="@+id/tv_good_code"
+        android:text="商品条码"
+        android:padding="3dp"
+        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"/>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="#000" />
+    <TextView
+        android:id="@+id/tv_good_name"
+        android:text="商品名称"
+        android:padding="3dp"
+        android:gravity="center"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"/>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="#000" />
+    <EditText
+        android:id="@+id/et_input_number"
+        android:text="入库数量"
+        android:padding="3dp"
+        android:gravity="center"
+        android:layout_width="0dp"
+        android:textSize="15sp"
+        android:textColor="#696767"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"/>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="#000" />
+
+</LinearLayout>
