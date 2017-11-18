@@ -196,7 +196,7 @@ public class HttpUtils {
     }
 
     private static int getNor() {
-        return random.nextInt(20) + 80;
+        return random.nextInt(90) + 10;
     }
 
     private static Random random=new Random();

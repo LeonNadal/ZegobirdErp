@@ -87,6 +87,13 @@
             android:dividerHeight="2dp"
             >
         </ListView>
-
+    <View
+        android:id="@+id/bottom_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        android:background="#525252" />
 
 </LinearLayout>

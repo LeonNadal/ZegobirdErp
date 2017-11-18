@@ -60,6 +60,15 @@ public class GoodQueryBean {
         private String ProductModel;
         private int ProductStorage;
         private int ValidStorage;
+        private String PositionName;
+
+        public String getPositionName() {
+            return PositionName;
+        }
+
+        public void setPositionName(String positionName) {
+            PositionName = positionName;
+        }
 
         public int getProduct_Id() {
             return Product_Id;

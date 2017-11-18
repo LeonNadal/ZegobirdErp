@@ -57,25 +57,31 @@ public class GoodQueryFragment extends BaseFragment implements View.OnKeyListene
                     break;
                 case  RESULT_NO_ORDER:
                     Toast.makeText(mContext, "该单号不存在", Toast.LENGTH_SHORT).show();
+                    bottomDivider.setVisibility(View.INVISIBLE);
                     break;
                 case  RESULT:
-                    Toast.makeText(mContext, "ok", Toast.LENGTH_SHORT).show();
                     if(goodQueryBean!=null && goodQueryBean.getData().size()!=0){
                        /* GoodInputFragment.GoodInputAdapter goodInputAdapter = new GoodInputFragment.GoodInputAdapter
                                 ( goodQueryBean.getData().getProductInfo());
                         lvGoodInput.setAdapter(goodInputAdapter);*/
                         tvGoodName.setText(goodQueryBean.getData().get(0).getProductName());
                         tvGoodNumber.setText(goodQueryBean.getData().get(0).getProductCode());
-                        goodQueryBean.getData();
-                         goodQueryAdapter = new GoodQueryAdapter(goodQueryBean
-                                 .getData());
-                        lvGoodQuery.setAdapter(goodQueryAdapter);
+                        if(goodQueryAdapter==null) {
+                            goodQueryAdapter = new GoodQueryAdapter(goodQueryBean
+                                    .getData());
+                            lvGoodQuery.setAdapter(goodQueryAdapter);
+                        }
+                        goodQueryAdapter.notifyDataSetChanged();
+                        bottomDivider.setVisibility(View.VISIBLE);
                     }else{
                         Toast.makeText(mContext, "该单号没有数据", Toast.LENGTH_SHORT).show();
                         tvGoodName.setText("");
                         tvGoodNumber.setText("");
-                        goodQueryAdapter.clear();
-                        goodQueryAdapter.notifyDataSetChanged();
+                        if(goodQueryAdapter!=null && goodQueryAdapter.getCount()>0){
+                            goodQueryAdapter.clear();
+                            goodQueryAdapter.notifyDataSetChanged();
+                        }
+                        bottomDivider.setVisibility(View.INVISIBLE);
                     }
                     break;
                 case  RESULT_ERR_TIP:
@@ -83,6 +89,13 @@ public class GoodQueryFragment extends BaseFragment implements View.OnKeyListene
                     break;
                 case DATA_EMPTY:
                     Toast.makeText(mContext, "单号不能为空", Toast.LENGTH_SHORT).show();
+                    tvGoodName.setText("");
+                    tvGoodNumber.setText("");
+                    if(goodQueryAdapter!=null && goodQueryAdapter.getCount()>0){
+                        goodQueryAdapter.clear();
+                        goodQueryAdapter.notifyDataSetChanged();
+                    }
+                    bottomDivider.setVisibility(View.INVISIBLE);
                     break;
             }
         }
@@ -90,6 +103,7 @@ public class GoodQueryFragment extends BaseFragment implements View.OnKeyListene
     private GoodQueryBean goodQueryBean;
     private Map<String,String> jsonMap=new WeakHashMap<>();
     private Gson gson=new Gson();
+    private String lastOrderCode="";
 
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -98,52 +112,57 @@ public class GoodQueryFragment extends BaseFragment implements View.OnKeyListene
             switch (v.getId()) {
                 case  R.id.et_good_code:
                     String content = etGoodCode.getText().toString();
-                    if(!TextUtils.isEmpty(content)){
-                        //请求数据
-                        //// TODO: 2017/11/13
-                        jsonMap.put("ProductCode",content);
-                        jsonMap.put("PageSize","100");
-                        jsonMap.put("PageIndex","1");
-                        String s = gson.toJson(jsonMap).toString();
-                        System.out.println("json:"+s);
-                        HttpUtils.post(mContext,UrlConstants.GOOD_QUERY,s, new HttpUtils
-                                .OnComplish() {
-                            @Override
-                            public void onFailure(String errMsg) {
-                                handler.sendEmptyMessage(RESULT_NO_ORDER);
-                            }
+                   if(!lastOrderCode.equals(content)) {
+                       if(!TextUtils.isEmpty(content)){
+                           //请求数据
+                           lastOrderCode=content;
 
-                            @Override
-                            public void onResponse(final String resultStr) {
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                         goodQueryBean = ProcessJsonData.processData
-                                                (resultStr, GoodQueryBean.class);
-                                        if(goodQueryBean.getResultCode().equals("0000")){
-                                            handler.sendEmptyMessage(RESULT);
-                                        }else{
-                                            Message msg = Message.obtain();
-                                            msg.what=RESULT_ERR_TIP;
-                                            Bundle bundle = new Bundle();
-                                            bundle.putString("errMsg",goodQueryBean.getMessage());
-                                            msg.setData(bundle);
-                                            handler.sendMessage(msg);
-                                        }
-                                    }
-                                }).start();
+                           jsonMap.put("ProductCode",content);
+                           jsonMap.put("PageSize","100");
+                           jsonMap.put("PageIndex","1");
+                           String s = gson.toJson(jsonMap).toString();
+                           System.out.println("json:"+s);
+                           HttpUtils.post(mContext,UrlConstants.GOOD_QUERY,s, new HttpUtils
+                                   .OnComplish() {
+                               @Override
+                               public void onFailure(String errMsg) {
+                                   handler.sendEmptyMessage(RESULT_NO_ORDER);
+                               }
 
-                            }
-                        });
-                    }else{
-                        handler.sendEmptyMessage(DATA_EMPTY);
-                    }
+                               @Override
+                               public void onResponse(final String resultStr) {
+                                   new Thread(new Runnable() {
+                                       @Override
+                                       public void run() {
+                                           goodQueryBean = ProcessJsonData.processData
+                                                   (resultStr, GoodQueryBean.class);
+                                           if(goodQueryBean.getResultCode().equals("0000")){
+                                               handler.sendEmptyMessage(RESULT);
+                                           }else{
+                                               Message msg = Message.obtain();
+                                               msg.what=RESULT_ERR_TIP;
+                                               Bundle bundle = new Bundle();
+                                               bundle.putString("errMsg",goodQueryBean.getMessage());
+                                               msg.setData(bundle);
+                                               handler.sendMessage(msg);
+                                           }
+                                       }
+                                   }).start();
+
+                               }
+                           });
+                       }else{
+                           handler.sendEmptyMessage(DATA_EMPTY);
+                       }
+                   }
                     break;
             }
             return true;
         }
         return false;
     }
+
+    private  View bottomDivider;
 
     @Override
     protected View initView() {
@@ -154,7 +173,18 @@ public class GoodQueryFragment extends BaseFragment implements View.OnKeyListene
             tvGoodName = (TextView)view.findViewById( R.id.tv_good_name );
             tvGoodNumber = (TextView)view.findViewById( R.id.tv_good_number );
             etGoodCode= (EditText) view.findViewById(R.id.et_good_code);
-            etGoodCode.setOnKeyListener(this);
+         bottomDivider = view.findViewById(R.id.bottom_divider);
+        etGoodCode.setOnKeyListener(this);
+        etGoodCode.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    mContext.showSoftInput(v);
+                }else{
+                    mContext.hideSoftInputFromWindow(v);
+                }
+            }
+        });
         return view;
     }
 
@@ -177,7 +207,6 @@ public class GoodQueryFragment extends BaseFragment implements View.OnKeyListene
         public void clear(){
             data.clear();
         }
-
 
         @Override
         public int getCount() {
@@ -208,15 +237,13 @@ public class GoodQueryFragment extends BaseFragment implements View.OnKeyListene
                 holder= (ViewHolder) convertView.getTag();
             }
             GoodQueryBean.DataBean item = getItem(position);
-            holder.tvPosition.setText("所在货位："+00);
-            holder.tvNumber.setText("库存数量：："+item.getProductStorage());
+            holder.tvPosition.setText("所在货位："+item.getPositionName());
+            holder.tvNumber.setText("库存数量:"+item.getProductStorage());
             holder.tvEnableNumber.setText("有效库存："+item.getValidStorage());
             return convertView;
         }
 
     }
-
-
 
     static class ViewHolder{
          TextView tvPosition;

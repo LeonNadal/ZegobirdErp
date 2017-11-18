@@ -252,7 +252,7 @@ public class GoodInputFragment extends BaseFragment implements View.OnClickListe
             isScaning = false;
         }
         mContext.unregisterReceiver(mScanReceiver);
-        System.out.println("调用");
+        System.out.println("onPause");
         mContext.hideSoftInputFromWindow(mContext.getCurrentFocus());
     }
 
