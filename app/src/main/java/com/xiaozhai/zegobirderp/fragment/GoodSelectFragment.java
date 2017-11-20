@@ -197,16 +197,6 @@ public class GoodSelectFragment extends BaseFragment {
             checkList.clear();
         }
 
-        //        private void initDataList() {
-//            dataList=new ArrayList<GoodSelectBean.DataBean>();
-//            for(int i=0;i<10;i++){
-//                GoodSelectBean.DataBean bean=new GoodSelectBean.DataBean();
-//                bean.setEnterQuantity(11);
-//                bean.setProductName("随便");
-//                bean.setProductCode("000111");
-//                data.add(bean);
-//            }
-//        }
 
 
         @Override
@@ -224,22 +214,6 @@ public class GoodSelectFragment extends BaseFragment {
             return 0;
         }
 
-      /*  @Override
-        public int getViewTypeCount() {
-            return 2;
-        }
-
-        private final  int TYPE_HEADER=0;
-        private final  int TYPE_NORMAL=1;
-
-        @Override
-        public int getItemViewType(int position) {
-            if(position==0){
-                return TYPE_HEADER;
-            }else{
-                return TYPE_NORMAL;
-            }
-        }*/
 
         private int currentPosition;
 

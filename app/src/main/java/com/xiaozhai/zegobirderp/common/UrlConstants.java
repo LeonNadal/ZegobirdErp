@@ -19,5 +19,8 @@ public class UrlConstants {
     //商品查询
     public final static String GOOD_QUERY =BASE_URL+"api/Storage/GetStorageProductCount";
 
+    //无单入库
+    public final static String NO_ORDER_INPUT=BASE_URL+"api/Purchase/GetProductInfo";
+
 
 }
