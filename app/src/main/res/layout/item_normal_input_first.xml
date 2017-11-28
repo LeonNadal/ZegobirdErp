@@ -10,8 +10,8 @@
         android:layout_centerInParent="true"
         android:background="#000" />
     <TextView
-        android:id="@+id/tv_good_number"
-        android:text="商品编号"
+        android:id="@+id/tv_input_number"
+        android:text="入库单号"
         android:padding="3dp"
         android:gravity="center"
         android:layout_width="0dp"
@@ -23,8 +23,8 @@
         android:layout_centerInParent="true"
         android:background="#000" />
     <TextView
-        android:id="@+id/tv_good_code"
-        android:text="商品条码"
+        android:id="@+id/tv_buy_code"
+        android:text="采购单号"
         android:padding="3dp"
         android:gravity="center"
         android:layout_width="0dp"
@@ -36,8 +36,8 @@
         android:layout_centerInParent="true"
         android:background="#000" />
     <TextView
-        android:id="@+id/tv_good_name"
-        android:text="商品名称"
+        android:id="@+id/tv_position"
+        android:text="收货位"
         android:padding="3dp"
         android:gravity="center"
         android:layout_width="0dp"
@@ -48,15 +48,12 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:background="#000" />
-    <EditText
-        android:id="@+id/et_input_number"
-        android:text="入库数量"
+    <TextView
+        android:id="@+id/tv_name"
+        android:text="已分配人员"
         android:padding="3dp"
         android:gravity="center"
         android:layout_width="0dp"
-        android:textSize="15sp"
-        android:inputType="number"
-        android:textColor="#696767"
         android:layout_weight="1"
         android:layout_height="wrap_content"/>
     <View

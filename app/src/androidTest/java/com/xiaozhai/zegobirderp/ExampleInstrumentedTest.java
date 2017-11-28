@@ -5,6 +5,10 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.TextUtils;
 
+import com.xiaozhai.zegobirderp.bean.NormalInputBean1;
+import com.xiaozhai.zegobirderp.utils.SqlHelpter;
+import com.xiaozhai.zegobirderp.utils.SqlManager;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -12,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -32,6 +37,19 @@ public class ExampleInstrumentedTest {
         System.out.println(re_str);
         String s = md5("1151021353655c68570e4-2c71-4a57-8c6c-fe1397ba82fb");
         System.out.println("signature:"+s);
+    }
+
+    @Test
+    public void testQueryClazz() throws Exception {
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        SqlManager<NormalInputBean1> manager = new SqlManager<>(appContext);
+        ArrayList<NormalInputBean1> normalInputBean1s = manager.queryAll(SqlHelpter
+                .TABLE_NORMAL_INPUT, null, null, NormalInputBean1.class);
+        if(normalInputBean1s!=null && normalInputBean1s.size()>0){
+            for (NormalInputBean1 item  :normalInputBean1s ) {
+                System.out.println("item:"+item.getCountry());
+            }
+        }
     }
 
 

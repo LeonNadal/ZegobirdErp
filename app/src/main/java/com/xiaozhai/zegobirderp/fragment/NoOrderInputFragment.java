@@ -99,6 +99,7 @@ public class NoOrderInputFragment extends BaseFragment implements View.OnClickLi
                     noOrderInputAdapter.notifyDataSetChanged();
                     break;
             }
+            removeCallbacksAndMessages(this);
         }
     };
 
@@ -327,7 +328,6 @@ public class NoOrderInputFragment extends BaseFragment implements View.OnClickLi
                         if(noOrderInputBeanResult.getResultCode().equals("0000")){
                             if(noOrderInputAdapter!=null && noOrderInputAdapter.getCount()>0) {
                                 noOrderInputAdapter.addData(noOrderInputBeanResult.getData());
-                                int total=noOrderInputAdapter.getTotalScan();
                                 handler.sendEmptyMessage(ADD);
                             }else{
                                 handler.sendEmptyMessage(RESULT);
