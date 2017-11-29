@@ -36,7 +36,7 @@ public class SqlManager<T> {
         for (Map.Entry<String,String>  item : selection.entrySet() ) {
         	ContentValues.put(item.getKey(),item.getValue());
         }
-        db.insert(tableName,null,ContentValues);
+        db.insert(tableName,nullColumnHack,ContentValues);
     }
 
     /**
@@ -77,13 +77,13 @@ public class SqlManager<T> {
 
 
     public  Cursor queryAll(String tableName, String selection, String[]
-            seletionArgs){
-        Cursor cursor = db.query(tableName, null, selection, seletionArgs, null, null, null);
+            selectionArgs){
+        Cursor cursor = db.query(tableName, null, selection, selectionArgs, null, null, null);
         return cursor;
     }
 
     public  ArrayList<T> queryAll( String tableName, String selection, String[]
-            seletionArgs, Class<T> clazz) throws Exception {
+            selectionArgs, Class<T> clazz) throws Exception {
 
         Field[] fields = clazz.getDeclaredFields();
         String[] fds=new String[fields.length];
@@ -91,7 +91,7 @@ public class SqlManager<T> {
         for(int i=0;i<fds.length;i++){
             fds[i]=fields[i].getName();
         }
-        Cursor cursor = queryAll( tableName, selection, seletionArgs);
+        Cursor cursor = queryAll( tableName, selection, selectionArgs);
         if(cursor!=null){
             list = new ArrayList<>();
             while(cursor.moveToNext()) {

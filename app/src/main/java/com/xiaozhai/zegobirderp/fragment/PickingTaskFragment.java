@@ -12,7 +12,6 @@ import com.xiaozhai.zegobirderp.R;
 import com.xiaozhai.zegobirderp.base.BaseFragment;
 import com.xiaozhai.zegobirderp.bean.CheckTackBean;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,20 +45,8 @@ public class PickingTaskFragment extends BaseFragment {
 
         public PickingTaskAdapter(Context context) {
             this.context=context;
-            initList();
         }
 
-        //假数据
-        private void initList() {
-            dataList=new ArrayList<CheckTackBean>();
-            for(int i=0;i<10;i++){
-                CheckTackBean bean = new CheckTackBean();
-                bean.setId("14545845"+i);
-                bean.setState("待拣货");
-                bean.setTack_state("未分配");
-                dataList.add(bean);
-            }
-        }
 
         @Override
         public int getCount() {
@@ -94,9 +81,6 @@ public class PickingTaskFragment extends BaseFragment {
                 holder= (ViewHolder) convertView.getTag();
             }
             CheckTackBean checkTackBean = dataList.get(position);
-            holder.tvCheckId.setText(checkTackBean.getId());
-            holder.tvState.setText(checkTackBean.getState());
-            holder.tvStateTask.setText(checkTackBean.getTack_state());
             return convertView;
         }
 

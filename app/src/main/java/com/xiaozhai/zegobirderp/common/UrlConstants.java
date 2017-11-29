@@ -22,5 +22,8 @@ public class UrlConstants {
     //无单入库
     public final static String NO_ORDER_INPUT=BASE_URL+"api/Purchase/GetProductInfo";
 
+    //盘点扫描
+    public final static String CHECK_SCAN=BASE_URL+"api/Storage/GetStorageCheckInfo";
+
 
 }

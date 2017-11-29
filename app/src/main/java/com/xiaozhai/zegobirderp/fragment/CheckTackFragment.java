@@ -1,8 +1,11 @@
 package com.xiaozhai.zegobirderp.fragment;
 
-import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -13,8 +16,8 @@ import com.xiaozhai.zegobirderp.R;
 import com.xiaozhai.zegobirderp.base.BaseFragment;
 import com.xiaozhai.zegobirderp.bean.CheckTackBean;
 import com.xiaozhai.zegobirderp.utils.HttpUtils;
+import com.xiaozhai.zegobirderp.utils.ProcessJsonData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +28,26 @@ public class CheckTackFragment extends BaseFragment {
 
     private ListView lvCheckTack;
 
+    private final int RESULT=0;
+    private  final int RESULT_ERR_TIP = 1;
+    private CheckTackAdapter checkTackAdapter;
 
+    private Handler mHandler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case  RESULT_ERR_TIP:
+                    Toast.makeText(mContext, msg.getData().getString("errMsg")+"", Toast.LENGTH_SHORT).show();
+                    break;
+                case RESULT:
+                    if(checkTackBeanResult!=null) {
+                         checkTackAdapter = new CheckTackAdapter(checkTackBeanResult.getData());
+                         lvCheckTack.setAdapter(checkTackAdapter);
+                    }
+                    break;
+            }
+        }
+    };
 
 
     @Override
@@ -35,13 +57,26 @@ public class CheckTackFragment extends BaseFragment {
         System.out.println("listview:"+lvCheckTack);
         FuncDetailActivity activity=(FuncDetailActivity)mContext;
         activity.btnCommit.setVisibility(View.GONE);
+        initListener();
         return view;
     }
+
+    private void initListener() {
+        lvCheckTack.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String checkCode = checkTackAdapter.getCheckCode(position);
+                mContext.dataMap.put("checkCode",checkCode);
+                mContext.goToFragment(8);
+            }
+        });
+    }
+
+    private CheckTackBean checkTackBeanResult;
 
     @Override
     protected void initData() {
         super.initData();
-        lvCheckTack.setAdapter(new CheckTackAdapter(mContext));
         HttpUtils.post(mContext, "http://119.29.90.197:8087/api/Storage/GetStorageCheckList",
                 "{\"UserId\":1,\"PageSize\":10,\"PageIndex\":1}", new HttpUtils.OnComplish() {
                     @Override
@@ -50,33 +85,39 @@ public class CheckTackFragment extends BaseFragment {
                     }
 
                     @Override
-                    public void onResponse(String resultStr) {
-                        System.out.println("result:"+resultStr);
+                    public void onResponse(final String resultStr) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                 checkTackBeanResult = ProcessJsonData.processData
+                                        (resultStr, CheckTackBean.class);
+                                if(checkTackBeanResult.getResultCode().equals("0000")){
+                                    mHandler.sendEmptyMessage(RESULT);
+                                }else{
+                                    Message msg = Message.obtain();
+                                    msg.what=RESULT_ERR_TIP;
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("errMsg",checkTackBeanResult.getMessage());
+                                    msg.setData(bundle);
+                                    mHandler.sendMessage(msg);
+                                }
+                            }
+                        }).start();
                     }
                 });
     }
 
+
+
     private class CheckTackAdapter extends BaseAdapter {
-        private final Context context;
 
-        private List<CheckTackBean> dataList;
+        private List<CheckTackBean.DataBean > dataList;
 
-        public CheckTackAdapter(Context context) {
-            this.context=context;
-            initList();
+        public CheckTackAdapter(List<CheckTackBean.DataBean >  dataList) {
+          this.dataList=dataList;
         }
 
-        //假数据
-        private void initList() {
-            dataList=new ArrayList<CheckTackBean>();
-            for(int i=0;i<10;i++){
-                CheckTackBean bean = new CheckTackBean();
-                bean.setId("14545845"+i);
-                bean.setState("盘点");
-                bean.setTack_state("未分配");
-                dataList.add(bean);
-            }
-        }
+
 
         @Override
         public int getCount() {
@@ -84,7 +125,7 @@ public class CheckTackFragment extends BaseFragment {
         }
 
         @Override
-        public CheckTackBean getItem(int position) {
+        public CheckTackBean.DataBean  getItem(int position) {
 
             return dataList.get(position);
         }
@@ -95,6 +136,9 @@ public class CheckTackFragment extends BaseFragment {
         }
 
 
+        public String getCheckCode(int position){
+            return getItem(position).getCheckCode();
+        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -110,10 +154,10 @@ public class CheckTackFragment extends BaseFragment {
             }else {
                 holder= (ViewHolder) convertView.getTag();
             }
-            CheckTackBean checkTackBean = dataList.get(position);
-            holder.tvCheckId.setText(checkTackBean.getId());
-            holder.tvState.setText(checkTackBean.getState());
-            holder.tvStateTask.setText(checkTackBean.getTack_state());
+            CheckTackBean.DataBean dataBean = dataList.get(position);
+            holder.tvCheckId.setText(dataBean.getCheck_Id()+"");
+            holder.tvState.setText(dataBean.getStatusTypeName());
+            holder.tvStateTask.setText("未分配");
             return convertView;
         }
 

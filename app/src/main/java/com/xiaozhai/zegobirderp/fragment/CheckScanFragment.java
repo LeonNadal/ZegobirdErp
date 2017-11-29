@@ -8,6 +8,9 @@ import android.device.ScanManager;
 import android.device.scanner.configuration.PropertyID;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +18,20 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xiaozhai.zegobirderp.FuncDetailActivity;
 import com.xiaozhai.zegobirderp.R;
 import com.xiaozhai.zegobirderp.base.BaseFragment;
 import com.xiaozhai.zegobirderp.bean.CheckScanBean;
+import com.xiaozhai.zegobirderp.bean.CheckTackBean;
+import com.xiaozhai.zegobirderp.utils.HttpUtils;
+import com.xiaozhai.zegobirderp.utils.ProcessJsonData;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import static com.bumptech.glide.load.engine.DiskCacheStrategy.RESULT;
 import static com.xiaozhai.zegobirderp.FuncDetailActivity.SCAN_ACTION;
 import static com.xiaozhai.zegobirderp.common.ScanConstant.SCANNER_APP_ENABLE;
 
@@ -35,18 +44,53 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
     private ListView lvCheckScan;
     private  ArrayList<View> views;
 
+    private int checkCode=0;
+
+    private final int RESULT=0;
+    private  final int RESULT_ERR_TIP = 1;
+    private CheckScanAdapter checkScanAdapter;
+
+    private Handler mHandler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case  RESULT_ERR_TIP:
+                    Toast.makeText(mContext, msg.getData().getString("errMsg")+"", Toast.LENGTH_SHORT).show();
+                    break;
+                case RESULT:
+                    if(checkScanBeanResult!=null) {
+                         checkScanAdapter=new CheckScanAdapter(checkScanBeanResult.getData().getStorageProductList())
+                        lvCheckScan.setAdapter(checkScanAdapter);
+                    }
+                    break;
+            }
+        }
+    };
+
     @Override
     protected View initView() {
         initTile("盘点扫描");
         isShowCommit(true);
         View view = View.inflate(mContext, R.layout.fragment_check_scan, null);
         lvCheckScan = (ListView)view.findViewById( R.id.lv_check_scan );
-        tv_OrderCode = (EditText) view.findViewById(R.id.tv_OrderCode);
+        tv_OrderCode = (TextView) view.findViewById(R.id.tv_OrderCode);
         etCheckPosition = (EditText)view.findViewById( R.id.et_check_position );
         etGoodCode = (EditText)view.findViewById( R.id.et_good_code );
-
         initListener();
+        checkCode= (int) mContext.dataMap.get("checkCode");
         return view;
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        System.out.println("boolean-------------"+hidden);
+        if(!hidden){
+            if(mContext.dataMap.containsKey("checkCode")){
+                 checkCode= (int) mContext.dataMap.get("checkCode");
+                System.out.println("checkcode"+checkCode);
+            }
+        }
+        super.onHiddenChanged(hidden);
     }
 
     private Vibrator mVibrator;
@@ -75,7 +119,6 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
                 case  0:
                     tv_OrderCode.setText("");
                     tv_OrderCode.setText(barcodeStr);
-                    tv_OrderCode.setSelection(tv_OrderCode.getText().length());
                     break;
                 case  1:
                     etCheckPosition.setText("");
@@ -122,11 +165,11 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
         mContext.sendBroadcast(intent);
     }
 
-    private EditText tv_OrderCode;
+    private TextView tv_OrderCode;
     private EditText etCheckPosition;
     private EditText etGoodCode;
 
-
+    private CheckScanBean checkScanBeanResult;
 
 
     @Override
@@ -134,11 +177,39 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         super.initData();
         lvCheckScan.addHeaderView(View.inflate(mContext,R.layout.item_good_select_header,null));
-        lvCheckScan.setAdapter(new CheckScanAdapter(mContext));
         views = new ArrayList<>();
         views.add(tv_OrderCode);
         views.add(etCheckPosition);
         views.add(etGoodCode);
+
+        HttpUtils.post(mContext, "http://119.29.90.197:8087/api/Storage/GetStorageCheckList",
+                "{\"Check_Id\": "+checkCode+"}", new HttpUtils.OnComplish() {
+                    @Override
+                    public void onFailure(String errMsg) {
+                        Toast.makeText(mContext, "失败了", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onResponse(final String resultStr) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                 checkScanBeanResult = ProcessJsonData.processData
+                                        (resultStr, CheckScanBean.class);
+                                if(checkScanBeanResult.getResultCode().equals("0000")){
+                                    mHandler.sendEmptyMessage(RESULT);
+                                }else{
+                                    Message msg = Message.obtain();
+                                    msg.what=RESULT_ERR_TIP;
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("errMsg",checkScanBeanResult.getMessage());
+                                    msg.setData(bundle);
+                                    mHandler.sendMessage(msg);
+                                }
+                            }
+                        }).start();
+                    }
+                });
     }
 
 
@@ -147,6 +218,7 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
     public void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
+        System.out.println("onResume------------------");
         initScan();
         tv_OrderCode.setText("");
         IntentFilter filter = new IntentFilter();
@@ -207,25 +279,13 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
     }
 
     private class CheckScanAdapter extends BaseAdapter {
-        private final FuncDetailActivity context;
-        private ArrayList<CheckScanBean> dataList;
+        private ArrayList<CheckScanBean.DataBean> dataList;
 
-        public CheckScanAdapter(FuncDetailActivity context) {
-            this.context=context;
-            initListData();
+        public CheckScanAdapter(List<CheckScanBean.DataBean.StorageProductListBean> dataList) {
+            this.dataList=dataList;
         }
 
-        private void initListData() {
-            dataList=new ArrayList<CheckScanBean>();
-            for (int i = 0; i < 10; i++) {
-                CheckScanBean checkScanBean = new CheckScanBean();
-                checkScanBean.setCode("961234567");
-                checkScanBean.setName("荣耀8");
-                checkScanBean.setPosition("pc_01010101010");
-                checkScanBean.setNumber(0);
-                dataList.add(checkScanBean);
-            }
-        }
+
 
         @Override
         public int getCount() {
@@ -233,7 +293,7 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
         }
 
         @Override
-        public CheckScanBean getItem(int position) {
+        public CheckScanBean.DataBean getItem(int position) {
             return dataList.get(position);
         }
 
@@ -256,8 +316,8 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
             }else{
                 holder= (ViewHolder) convertView.getTag();
             }
-            CheckScanBean bean = dataList.get(position);
-            holder.tvName.setText("名称："+bean.getName());
+            CheckScanBean.DataBean bean = dataList.get(position);
+            holder.tvName.setText("名称："+bean.);
             holder.tvPosition.setText("货位："+bean.getPosition());
             holder.tvNumber.setText("扫描数量："+bean.getNumber());
             holder.tvCode.setText("商品条码："+bean.getCode());

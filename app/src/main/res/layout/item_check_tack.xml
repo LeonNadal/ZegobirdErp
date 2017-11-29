@@ -8,11 +8,11 @@
         <TextView
             android:id="@+id/tv_check_id"
             android:layout_width="0dp"
-            android:layout_weight="2"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:textColor="#212121"
             android:textSize="20sp"
-            android:text="sc55555555"
+            android:text="sc5555"
             android:padding="8dp"
             />
         <TextView
