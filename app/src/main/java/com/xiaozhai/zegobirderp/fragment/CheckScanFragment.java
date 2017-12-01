@@ -20,18 +20,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.xiaozhai.zegobirderp.FuncDetailActivity;
 import com.xiaozhai.zegobirderp.R;
 import com.xiaozhai.zegobirderp.base.BaseFragment;
 import com.xiaozhai.zegobirderp.bean.CheckScanBean;
-import com.xiaozhai.zegobirderp.bean.CheckTackBean;
 import com.xiaozhai.zegobirderp.utils.HttpUtils;
 import com.xiaozhai.zegobirderp.utils.ProcessJsonData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bumptech.glide.load.engine.DiskCacheStrategy.RESULT;
 import static com.xiaozhai.zegobirderp.FuncDetailActivity.SCAN_ACTION;
 import static com.xiaozhai.zegobirderp.common.ScanConstant.SCANNER_APP_ENABLE;
 
@@ -59,7 +56,7 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
                     break;
                 case RESULT:
                     if(checkScanBeanResult!=null) {
-                         checkScanAdapter=new CheckScanAdapter(checkScanBeanResult.getData().getStorageProductList())
+                         checkScanAdapter=new CheckScanAdapter(checkScanBeanResult.getData().getStorageProductList());
                         lvCheckScan.setAdapter(checkScanAdapter);
                     }
                     break;
@@ -282,7 +279,7 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
         private ArrayList<CheckScanBean.DataBean> dataList;
 
         public CheckScanAdapter(List<CheckScanBean.DataBean.StorageProductListBean> dataList) {
-            this.dataList=dataList;
+//            this.dataList=dataList;
         }
 
 
@@ -317,10 +314,10 @@ public class CheckScanFragment extends BaseFragment implements View.OnClickListe
                 holder= (ViewHolder) convertView.getTag();
             }
             CheckScanBean.DataBean bean = dataList.get(position);
-            holder.tvName.setText("名称："+bean.);
-            holder.tvPosition.setText("货位："+bean.getPosition());
-            holder.tvNumber.setText("扫描数量："+bean.getNumber());
-            holder.tvCode.setText("商品条码："+bean.getCode());
+//            holder.tvName.setText("名称："+bean.);
+//            holder.tvPosition.setText("货位："+bean.getPosition());
+//            holder.tvNumber.setText("扫描数量："+bean.getNumber());
+//            holder.tvCode.setText("商品条码："+bean.getCode());
             return convertView;
         }
 

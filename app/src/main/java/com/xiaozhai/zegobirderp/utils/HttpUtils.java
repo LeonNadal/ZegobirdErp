@@ -168,7 +168,7 @@ public class HttpUtils {
         MediaType JSON = MediaType.parse("application/json;charset=utf-8");//数据类型为json格式，
         RequestBody body = RequestBody.create(JSON, "{\n" +
                 "    \"UserName\": \"admin\",\n" +
-                "    \"UserPwd\": \"mdb123\"\n" +
+                "    \"UserPwd\": \"test123456\"\n" +
                 "}");
         Request request = new Request.Builder()
                 .url("http://119.29.90.197:8087/api/User/Login")
